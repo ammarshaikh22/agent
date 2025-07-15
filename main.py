@@ -32,8 +32,6 @@ user_data = {
     "message": message
 }
 
-
-
 @function_tool
 def send_whatsapp_message():
     url = f"https://api.ultramsg.com/instance131802/messages/chat"

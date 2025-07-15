@@ -1,9 +1,9 @@
 rishtas = [
     # Female Rishtas (50)
-    {"name": "Ayesha", "age": 24, "gender": "Female", "profession": "Designer", "education": "BSCS"},
-    {"name": "Fatima", "age": 26, "gender": "Female", "profession": "Engineer", "education": "B.E"},
-    {"name": "Zainab", "age": 25, "gender": "Female", "profession": "Doctor", "education": "MBBS"},
-    {"name": "Hira", "age": 27, "gender": "Female", "profession": "Teacher", "education": "MA English"},
+    {"name": "Ayesha", "age": 18, "gender": "Female", "profession": "Designer", "education": "BSCS"},
+    {"name": "Fatima", "age": 20, "gender": "Female", "profession": "Engineer", "education": "B.E"},
+    {"name": "Zainab", "age": 19, "gender": "Female", "profession": "Doctor", "education": "MBBS"},
+    {"name": "Hira", "age": 22, "gender": "Female", "profession": "Teacher", "education": "MA English"},
     {"name": "Sara", "age": 23, "gender": "Female", "profession": "Lawyer", "education": "LLB"},
     {"name": "Mehwish", "age": 29, "gender": "Female", "profession": "HR Manager", "education": "MBA"},
     {"name": "Laiba", "age": 22, "gender": "Female", "profession": "Pharmacist", "education": "PharmD"},
