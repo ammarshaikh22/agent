@@ -3,6 +3,7 @@ import asyncio
 import requests
 from dotenv import load_dotenv
 import streamlit as st
+from data import rishtas
 from agents import AsyncOpenAI, OpenAIChatCompletionsModel, RunConfig, Agent, Runner, function_tool
 load_dotenv()
 api = os.getenv("OPENAI_KEY")
@@ -31,12 +32,7 @@ user_data = {
     "message": message
 }
 
-rishtas = [
-    {"name": "Ayesha", "age": 24, "gender": "Female", "profession": "Designer", "education": "BSCS"},
-    {"name": "Fatima", "age": 26, "gender": "Female", "profession": "Engineer", "education": "B.E"},
-    {"name": "Ali", "age": 28, "gender": "Male", "profession": "Software Engineer", "education": "BSCS"},
-    {"name": "Ahmed", "age": 30, "gender": "Male", "profession": "Banker", "education": "MBA"}
-]
+
 
 @function_tool
 def send_whatsapp_message():
