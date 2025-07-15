@@ -67,7 +67,14 @@ Always confirm you used the tool.
 
 async def main():
     opposite_gender = "Female" if user_data["gender"] == "Male" else "Male"
-    match = next((r for r in rishtas if r["gender"] == opposite_gender), None)
+
+    def score_match(rishta):
+        age_diff = abs(rishta["age"] - user_data["age"])
+        profession_match = 0 if rishta["profession"].lower() == user_data["profession"].lower() else 5
+        return age_diff + profession_match
+
+    eligible_matches = [r for r in rishtas if r["gender"] == opposite_gender]
+    match = min(eligible_matches, key=score_match, default=None)
 
     match_info = (
         f"Name: {match['name']}\n"
@@ -77,15 +84,15 @@ async def main():
     ) if match else "No suitable match found."
 
     full_prompt = (
-    f"My name is {name}, I am a {age} year old {gender}. "
-    f"I work as a {profession} and my education is {education}. "
-    f"Please find a rishta for me based on opposite gender, and then send this to my WhatsApp using your tool."
+        f"My name is {name}, I am a {age} year old {gender}. "
+        f"I work as a {profession} and my education is {education}. "
+        f"Please find a rishta for me based on opposite gender, and then send this to my WhatsApp using your tool."
     )
-
 
     user_data["message"] = f"Rishta suggestion:\n{match_info}"
     result = await Runner.run(agent, full_prompt, run_config=config)
     return result.final_output
+
 
 if st.button("Find My Rishta & Send on WhatsApp"):
     if not api or not token:
