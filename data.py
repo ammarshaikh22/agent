@@ -52,7 +52,6 @@ rishtas = [
     {"name": "Farah", "age": 27, "gender": "Female", "profession": "QA Engineer", "education": "BSSE"},
 
     # Male Rishtas (50)
-    {"name": "Ammar", "age": 19, "gender": "Male", "profession": "Software Engineer", "education": "BSCS"},
     {"name": "Ali", "age": 28, "gender": "Male", "profession": "Software Engineer", "education": "BSCS"},
     {"name": "Ahmed", "age": 30, "gender": "Male", "profession": "Banker", "education": "MBA"},
     {"name": "Usman", "age": 27, "gender": "Male", "profession": "Doctor", "education": "MBBS"},

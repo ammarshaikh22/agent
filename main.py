@@ -40,7 +40,7 @@ user_data = {
 # WhatsApp tool
 @function_tool
 def send_whatsapp_message():
-    url = "https://api.ultramsg.com/instance132485/messages/chat"
+    url = "https://api.ultramsg.com/instance131802/messages/chat"
     payload = {
         "token": token,
         "to": f"+92{user_data['number']}",
