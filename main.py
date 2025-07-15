@@ -5,10 +5,13 @@ from dotenv import load_dotenv
 import streamlit as st
 from data import rishtas
 from agents import AsyncOpenAI, OpenAIChatCompletionsModel, RunConfig, Agent, Runner, function_tool
+
+# Load environment variables
 load_dotenv()
 api = os.getenv("OPENAI_KEY")
 token = os.getenv("TOKEN")
 
+# Streamlit UI
 st.title("Rishta Wali Aunty 📱💌")
 
 name = st.text_input("Enter your name")
@@ -17,11 +20,13 @@ gender = st.selectbox("Select your gender", ["Male", "Female"])
 profession = st.text_input("Enter your profession")
 education = st.text_input("Enter your education")
 number = st.text_input("Enter your WhatsApp number (without +92)")
-message = st.text_area("Write your own intro or message")
+message = st.text_area("Write your own intro or message (optional)")
 
+# Clean inputs
 number = number.replace(" ", "").replace("-", "")
 message = message.replace("\n", " ")
 
+# User data
 user_data = {
     "name": name,
     "age": age,
@@ -32,19 +37,28 @@ user_data = {
     "message": message
 }
 
+# WhatsApp tool
 @function_tool
 def send_whatsapp_message():
-    url = f"https://api.ultramsg.com/instance131802/messages/chat"
+    url = "https://api.ultramsg.com/instance131802/messages/chat"
     payload = {
         "token": token,
         "to": f"+92{user_data['number']}",
-        "body": user_data['message']
+        "body": user_data["message"]
     }
     res = requests.post(url, data=payload)
     print("Message response:", res.text)
 
-external_agent = AsyncOpenAI(api_key=api,base_url="https://generativelanguage.googleapis.com/v1beta/openai/")
-model = OpenAIChatCompletionsModel(openai_client=external_agent, model="gemini-2.0-flash")
+# Agent setup
+external_agent = AsyncOpenAI(
+    api_key=api,
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+)
+
+model = OpenAIChatCompletionsModel(
+    openai_client=external_agent,
+    model="gemini-2.0-flash"
+)
 
 config = RunConfig(
     model=model,
@@ -54,17 +68,20 @@ config = RunConfig(
 
 agent = Agent(
     name="Rishta_Wali_Aunty",
-   instructions="""
-You are Rishta Wali Aunty. Your job is to find a perfect match from the rishta list based on the user's gender.
-If the user is Male, suggest a Female match from the list and vice versa.
-Suggest only one perfect rishta and explain why it's a good match.
+    instructions="""
+You are Rishta Wali Aunty 🤝 — your task is to find a perfect rishta from the provided list based on user's *opposite gender*.
 
-After choosing the match, you MUST call the tool send_whatsapp_message() to send the rishta details to the user's WhatsApp.
-Always confirm you used the tool.
+Only return ONE best match, and explain briefly why it's a suitable rishta. After that, you MUST send a WhatsApp message using the `send_whatsapp_message()` tool.
+
+⚠️ IMPORTANT:
+- The message you send *must include both* the user's details and the rishta's details in a clear format.
+- Do NOT change the content of the message given in the prompt — just pass it to the tool.
+- Always confirm after using the tool that the message was sent.
 """,
     tools=[send_whatsapp_message],
 )
 
+# Matching logic + agent runner
 async def main():
     opposite_gender = "Female" if user_data["gender"] == "Male" else "Male"
 
@@ -76,31 +93,50 @@ async def main():
     eligible_matches = [r for r in rishtas if r["gender"] == opposite_gender]
     match = min(eligible_matches, key=score_match, default=None)
 
-    match_info = (
-        f"Name: {match['name']}\n"
-        f"Age: {match['age']}\n"
-        f"Profession: {match['profession']}\n"
-        f"Education: {match['education']}"
-    ) if match else "No suitable match found."
+    if match:
+        match_info = (
+            f"🌟 *Match Found!*\n"
+            f"👤 Name: {match['name']}\n"
+            f"🎂 Age: {match['age']}\n"
+            f"💼 Profession: {match['profession']}\n"
+            f"🎓 Education: {match['education']}"
+        )
+    else:
+        match_info = "❌ No suitable match found."
 
-    full_prompt = (
-        f"My name is {name}, I am a {age} year old {gender}. "
-        f"I work as a {profession} and my education is {education}. "
-        f"Please find a rishta for me based on opposite gender, and then send this to my WhatsApp using your tool."
+    # WhatsApp message to be sent
+    full_message = (
+        f"📋 *Your Info:*\n"
+        f"Name: {user_data['name']}\n"
+        f"Age: {user_data['age']}\n"
+        f"Gender: {user_data['gender']}\n"
+        f"Profession: {user_data['profession']}\n"
+        f"Education: {user_data['education']}\n\n"
+        f"{match_info}"
     )
 
-    user_data["message"] = f"Rishta suggestion:\n{match_info}"
-    result = await Runner.run(agent, full_prompt, run_config=config)
-    return result.final_output
+    # Save message to global user_data for the tool to use
+    user_data["message"] = full_message
 
+    prompt = (
+        f"Please send the following message on WhatsApp using the tool:\n\n{full_message}"
+    )
 
+    result = await Runner.run(agent, prompt, run_config=config)
+    return full_message, result.final_output
+
+# Streamlit button and execution
 if st.button("Find My Rishta & Send on WhatsApp"):
     if not api or not token:
         st.error("API Key or Token missing.")
-    elif not number or not message:
-        st.warning("Please fill in number and message.")
+    elif not number:
+        st.warning("Please enter your WhatsApp number.")
     else:
-        output = asyncio.run(main())
-        st.success("Message sent to WhatsApp successfully!")
-        st.write("Agent Reasoning:", output)
-        st.write("Your Provided Info:", user_data)
+        final_message, reasoning = asyncio.run(main())
+        st.success("✅ Message sent to WhatsApp successfully!")
+        st.markdown("### 📤 Message Sent:")
+        st.code(final_message)
+        st.markdown("### 🧠 Agent Reasoning:")
+        st.write(reasoning)
+        st.markdown("### 📝 Your Input Info:")
+        st.json(user_data)
